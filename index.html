@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>PlateQuest</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        :root {
+            --primary: #FF6B00;
+            --accent: #00FF9F;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', system-ui;
+            background: linear-gradient(135deg, #1a0033, #003300);
+            color: #fff;
+            min-height: 100vh;
+            background-attachment: fixed;
+            touch-action: manipulation;
+        }
+        
+        header {
+            background: rgba(0,0,0,0.9);
+            padding: 15px 10px;
+            text-align: center;
+            border-bottom: 5px solid var(--primary);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 1.8em;
+            text-shadow: 4px 4px 0 #000;
+            color: var(--accent);
+        }
+        
+        .subtitle {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+        
+        .container {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .main {
+            background: rgba(0,0,0,0.7);
+            border: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 15px;
+        }
+        
+        .sidebar {
+            background: rgba(0,0,0,0.7);
+            border: 4px solid var(--accent);
+            border-radius: 12px;
+            padding: 15px;
+        }
+        
+        .section h2 {
+            color: var(--accent);
+            font-size: 1.1em;
+            margin: 0 0 12px 0;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 6px;
+        }
+        
+        .regions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+        }
+        
+        .region-btn {
+            background: #222;
+            border: 4px solid #555;
+            color: white;
+            padding: 14px 8px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            min-height: 85px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .region-btn:hover, .region-btn:active {
+            transform: scale(1.08);
+            border-color: var(--primary);
+        }
+        
+        .region-btn.seen {
+            background: #004400;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px #00ff9f;
+        }
+        
+        .region-btn .abbr {
+            font-size: 1.6em;
+            font-weight: bold;
+        }
+        
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-family: 'Press Start 2P';
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 8px;
+            margin: 8px 0;
+            width: 100%;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            font-size: 1em;
+            border-radius: 8px;
+            border: 3px solid #555;
+            background: #111;
+            color: white;
+            box-sizing: border-box;
+        }
+        
+        .log-entry {
+            background: #111;
+            padding: 12px;
+            margin: 10px 0;
+            border-left: 6px solid var(--primary);
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 15px;
+        }
+        
+        .modal-content {
+            background: #111;
+            border: 6px solid var(--accent);
+            max-width: 420px;
+            width: 100%;
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            height: 28px;
+            background: #222;
+            border: 3px solid var(--accent);
+            margin: 12px 0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), #00cc7a);
+            transition: width 0.4s;
+        }
+        
+        .car {
+            font-size: 3.5em;
+            animation: drive 3s linear infinite;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        @keyframes drive {
+            0% { transform: translateX(-25px); }
+            100% { transform: translateX(25px); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🚗 PLATEQUEST 🚗</h1>
+        <p class="subtitle">Road Trip License Plate Adventure</p>
+    </header>
+    
+    <div class="container">
+        <!-- Main Content -->
+        <div class="main">
+            <div class="section">
+                <h2>United States (50)</h2>
+                <div id="us-grid" class="regions-grid"></div>
+            </div>
+            
+            <div class="section">
+                <h2>Canada (13)</h2>
+                <div id="canada-grid" class="regions-grid"></div>
+            </div>
+            
+            <div class="section">
+                <h2>US Territories (5)</h2>
+                <div id="territories-grid" class="regions-grid"></div>
+            </div>
+        </div>
+        
+        <!-- Sidebar / Controls -->
+        <div class="sidebar">
+            <div class="car">🏎️</div>
+            
+            <button onclick="showProgress()">📊 PROGRESS</button>
+            
+            <div id="progress-display" style="display:none; margin:15px 0;">
+                <p><strong>US:</strong> <span id="us-count">0</span>/50</p>
+                <div class="progress-bar"><div id="us-bar" class="progress-fill" style="width:0%"></div></div>
+                
+                <p><strong>Canada:</strong> <span id="ca-count">0</span>/13</p>
+                <div class="progress-bar"><div id="ca-bar" class="progress-fill" style="width:0%"></div></div>
+                
+                <p><strong>Territories:</strong> <span id="terr-count">0</span>/5</p>
+                <div class="progress-bar"><div id="terr-bar" class="progress-fill" style="width:0%"></div></div>
+            </div>
+            
+            <div class="section">
+                <h2>LOG PLATE</h2>
+                <input type="text" id="plate-input" placeholder="LICENSE PLATE (e.g. ABC1234)">
+                <select id="state-select"></select>
+                <button onclick="logPlate()">ADD TO LOG</button>
+            </div>
+            
+            <div class="section">
+                <h2>RECENT PLATES</h2>
+                <div id="plate-log" style="max-height:280px; overflow-y:auto;"></div>
+            </div>
+            
+            <button onclick="undoLast()" style="background:#cc0000;">↩️ UNDO LAST ACTION</button>
+        </div>
+    </div>
+    
+    <!-- Trivia Modal -->
+    <div id="trivia-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title"></h2>
+            <p id="modal-trivia" style="line-height:1.6; font-size:1em;"></p>
+            <button onclick="closeModal()" style="margin-top:20px;">AWESOME!</button>
+        </div>
+    </div>
+    
+    <script>
+        const regions = [
+            // US States
+            {code: "AL", name: "Alabama", type: "us", trivia: "Alabama is known as the Yellowhammer State and is home to the Boll Weevil Monument."},
+            {code: "AK", name: "Alaska", type: "us", trivia: "Alaska is the largest state by area and has over 100,000 glaciers."},
+            {code: "AZ", name: "Arizona", type: "us", trivia: "The Grand Canyon is located in Arizona and is one of the Seven Natural Wonders."},
+            {code: "AR", name: "Arkansas", type: "us", trivia: "Arkansas is the only US state that produces diamonds commercially."},
+            {code: "CA", name: "California", type: "us", trivia: "California is the most populous state and has the largest economy in the US."},
+            {code: "CO", name: "Colorado", type: "us", trivia: "Colorado is famous for the Rocky Mountains and outdoor recreation."},
+            {code: "CT", name: "Connecticut", type: "us", trivia: "Connecticut is known as the Constitution State and is home to Yale University."},
+            {code: "DE", name: "Delaware", type: "us", trivia: "Delaware was the first state to ratify the US Constitution in 1787."},
+            {code: "FL", name: "Florida", type: "us", trivia: "Florida is known as the Sunshine State and is a major tourism destination."},
+            {code: "GA", name: "Georgia", type: "us", trivia: "Georgia is the Peach State and has been producing peaches since the 1800s."},
+            {code: "HI", name: "Hawaii", type: "us", trivia: "Hawaii is the only state that is made entirely of islands."},
+            {code: "ID", name: "Idaho", type: "us", trivia: "Idaho produces more potatoes than any other state in the US."},
+            {code: "IL", name: "Illinois", type: "us", trivia: "Illinois is home to Chicago, known as the Windy City."},
+            {code: "IN", name: "Indiana", type: "us", trivia: "Indiana is home to the famous Indianapolis 500 auto race."},
+            {code: "IA", name: "Iowa", type: "us", trivia: "Iowa leads the nation in corn and soybean production."},
+            {code: "KS", name: "Kansas", type: "us", trivia: "Kansas is the geographical center of the contiguous United States."},
+            {code: "KY", name: "Kentucky", type: "us", trivia: "Kentucky is famous for bourbon whiskey and thoroughbred horses."},
+            {code: "LA", name: "Louisiana", type: "us", trivia: "Louisiana is home to New Orleans, the birthplace of jazz."},
+            {code: "ME", name: "Maine", type: "us", trivia: "Maine produces over 90% of America's lobster supply."},
+            {code: "MD", name: "Maryland", type: "us", trivia: "Maryland's state flag is the only one in the US with a living full heraldic achievement."},
+            {code: "MA", name: "Massachusetts", type: "us", trivia: "Massachusetts is home to Harvard, the oldest institution of higher education in the US."},
+            {code: "MI", name: "Michigan", type: "us", trivia: "Michigan is surrounded by the Great Lakes and is known as the Motor City."},
+            {code: "MN", name: "Minnesota", type: "us", trivia: "Minnesota is known as the Land of 10,000 Lakes and has over 9,000."},
+            {code: "MS", name: "Mississippi", type: "us", trivia: "The Mississippi River is the second-longest river in North America."},
+            {code: "MO", name: "Missouri", type: "us", trivia: "Missouri is the Show-Me State and is home to the Gateway Arch."},
+            {code: "MT", name: "Montana", type: "us", trivia: "Montana has more national parks than any other state."},
+            {code: "NE", name: "Nebraska", type: "us", trivia: "Nebraska is one of the few states shaped like a rectangle."},
+            {code: "NV", name: "Nevada", type: "us", trivia: "Nevada is home to Las Vegas, the entertainment capital of the world."},
+            {code: "NH", name: "New Hampshire", type: "us", trivia: "New Hampshire has the oldest state fair in the US, established in 1725."},
+            {code: "NJ", name: "New Jersey", type: "us", trivia: "New Jersey is the most densely populated state in the US."},
+            {code: "NM", name: "New Mexico", type: "us", trivia: "New Mexico is home to Carlsbad Caverns, one of the largest cave systems in the world."},
+            {code: "NY", name: "New York", type: "us", trivia: "New York is home to New York City, the most populous city in the US."},
+            {code: "NC", name: "North Carolina", type: "us", trivia: "North Carolina's Outer Banks are famous for the Wright Brothers' first flight."},
+            {code: "ND", name: "North Dakota", type: "us", trivia: "North Dakota produces more spring wheat than any other state."},
+            {code: "OH", name: "Ohio", type: "us", trivia: "Ohio is the Buckeye State and has produced more presidents than any other state."},
+            {code: "OK", name: "Oklahoma", type: "us", trivia: "Oklahoma is home to the Route 66, a historic highway."},
+            {code: "OR", name: "Oregon", type: "us", trivia: "Oregon is known as the Beaver State and has no sales tax."},
+            {code: "PA", name: "Pennsylvania", type: "us", trivia: "Pennsylvania is the Keystone State and the birthplace of American independence."},
+            {code: "RI", name: "Rhode Island", type: "us", trivia: "Rhode Island is the smallest state by area but has a thriving arts scene."},
+            {code: "SC", name: "South Carolina", type: "us", trivia: "South Carolina is home to the first African-American city in the US, Charleston."},
+            {code: "SD", name: "South Dakota", type: "us", trivia: "South Dakota is home to Mount Rushmore, one of the world's largest monuments."},
+            {code: "TN", name: "Tennessee", type: "us", trivia: "Tennessee is the home of country music and the Grand Ole Opry."},
+            {code: "TX", name: "Texas", type: "us", trivia: "Texas is the second-largest state by area and population."},
+            {code: "UT", name: "Utah", type: "us", trivia: "Utah is known as the Beehive State and has stunning national parks."},
+            {code: "VT", name: "Vermont", type: "us", trivia: "Vermont is the leading producer of maple syrup in the US."},
+            {code: "VA", name: "Virginia", type: "us", trivia: "Virginia is known as the Old Dominion and is home to eight US presidents."},
+            {code: "WA", name: "Washington", type: "us", trivia: "Washington is home to Mount Rainier and the Seattle Space Needle."},
+            {code: "WV", name: "West Virginia", type: "us", trivia: "West Virginia is the only state entirely in the Appalachian region."},
+            {code: "WI", name: "Wisconsin", type: "us", trivia: "Wisconsin is the Dairy State and produces over 3 billion pounds of cheese annually."},
+            {code: "WY", name: "Wyoming", type: "us", trivia: "Wyoming is the least populous state and has more antelope than people."},
+            
+            // Canadian Provinces
+            {code: "AB", name: "Alberta", type: "ca", trivia: "Alberta is home to the Canadian Rockies and Banff National Park."},
+            {code: "BC", name: "British Columbia", type: "ca", trivia: "British Columbia is known for its pristine wilderness and Vancouver."},
+            {code: "MB", name: "Manitoba", type: "ca", trivia: "Manitoba is home to Churchill, the polar bear capital of the world."},
+            {code: "NB", name: "New Brunswick", type: "ca", trivia: "New Brunswick is home to the Bay of Fundy with the highest tides in the world."},
+            {code: "NL", name: "Newfoundland & Labrador", type: "ca", trivia: "Newfoundland is the easternmost province and has a unique culture."},
+            {code: "NS", name: "Nova Scotia", type: "ca", trivia: "Nova Scotia is the Maritime province surrounded by ocean."},
+            {code: "ON", name: "Ontario", type: "ca", trivia: "Ontario is home to Niagara Falls and Toronto, Canada's largest city."},
+            {code: "PE", name: "Prince Edward Island", type: "ca", trivia: "Prince Edward Island is Canada's smallest province and is famous for red sand beaches."},
+            {code: "QC", name: "Quebec", type: "ca", trivia: "Quebec is the only Canadian province with French as the official language."},
+            {code: "SK", name: "Saskatchewan", type: "ca", trivia: "Saskatchewan is the land of living skies and is known for agriculture."},
+            {code: "NT", name: "Northwest Territories", type: "ca", trivia: "The Northwest Territories are home to the Northern Lights."},
+            {code: "NU", name: "Nunavut", type: "ca", trivia: "Nunavut is Canada's newest and largest territory by area."},
+            {code: "YT", name: "Yukon", type: "ca", trivia: "Yukon is home to Dawson City and the famous gold rush history."},
+            
+            // US Territories
+            {code: "PR", name: "Puerto Rico", type: "territories", trivia: "Puerto Rico is a US territory with a rich culture and El Yunque rainforest."},
+            {code: "GU", name: "Guam", type: "territories", trivia: "Guam is a strategic US territory in the Pacific Ocean."},
+            {code: "VI", name: "US Virgin Islands", type: "territories", trivia: "The US Virgin Islands are a tropical paradise in the Caribbean."},
+            {code: "AS", name: "American Samoa", type: "territories", trivia: "American Samoa is home to the Samoan culture and is located in the South Pacific."},
+            {code: "MP", name: "Northern Mariana Islands", type: "territories", trivia: "The Northern Mariana Islands are located in the western Pacific Ocean."}
+        ];
+        
+        let seen = new Set();
+        let plateLog = [];
+        let lastAction = null;
+        
+        function renderGrids() {
+            const usGrid = document.getElementById('us-grid');
+            const caGrid = document.getElementById('canada-grid');
+            const terrGrid = document.getElementById('territories-grid');
+            
+            usGrid.innerHTML = '';
+            caGrid.innerHTML = '';
+            terrGrid.innerHTML = '';
+            
+            regions.forEach(region => {
+                const btn = document.createElement('button');
+                btn.className = 'region-btn';
+                if (seen.has(region.code)) btn.classList.add('seen');
+                btn.innerHTML = `<div class="abbr">${region.code}</div><div>${region.name}</div>`;
+                btn.onclick = () => markSeen(region);
+                
+                if (region.type === 'us') usGrid.appendChild(btn);
+                else if (region.type === 'ca') caGrid.appendChild(btn);
+                else if (region.type === 'territories') terrGrid.appendChild(btn);
+            });
+            
+            // Populate state select
+            const select = document.getElementById('state-select');
+            select.innerHTML = '';
+            regions.forEach(region => {
+                const option = document.createElement('option');
+                option.value = region.code;
+                option.textContent = region.name;
+                select.appendChild(option);
+            });
+        }
+        
+        function markSeen(region) {
+            if (seen.has(region.code)) {
+                seen.delete(region.code);
+                lastAction = {type: 'unmark', code: region.code};
+            } else {
+                seen.add(region.code);
+                lastAction = {type: 'mark', code: region.code};
+                showTrivia(region);
+            }
+            renderGrids();
+            updateProgress();
+        }
+        
+        function showTrivia(region) {
+            document.getElementById('modal-title').textContent = region.name;
+            document.getElementById('modal-trivia').textContent = region.trivia;
+            document.getElementById('trivia-modal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('trivia-modal').style.display = 'none';
+        }
+        
+        function logPlate() {
+            const plate = document.getElementById('plate-input').value.toUpperCase();
+            const state = document.getElementById('state-select').value;
+            
+            if (!plate) {
+                alert('Please enter a license plate!');
+                return;
+            }
+            
+            const stateObj = regions.find(r => r.code === state);
+            plateLog.push({plate, code: state, name: stateObj.name, timestamp: new Date().toLocaleTimeString()});
+            lastAction = {type: 'log', plate};
+            
+            document.getElementById('plate-input').value = '';
+            renderLog();
+        }
+        
+        function renderLog() {
+            const logDiv = document.getElementById('plate-log');
+            logDiv.innerHTML = '';
+            plateLog.slice().reverse().forEach((entry, idx) => {
+                const div = document.createElement('div');
+                div.className = 'log-entry';
+                div.textContent = `${entry.plate} (${entry.code}) @ ${entry.timestamp}`;
+                logDiv.appendChild(div);
+            });
+        }
+        
+        function undoLast() {
+            if (!lastAction) {
+                alert('No action to undo!');
+                return;
+            }
+            
+            if (lastAction.type === 'mark') {
+                seen.delete(lastAction.code);
+                renderGrids();
+                updateProgress();
+            } else if (lastAction.type === 'unmark') {
+                seen.add(lastAction.code);
+                renderGrids();
+                updateProgress();
+            } else if (lastAction.type === 'log') {
+                plateLog.pop();
+                renderLog();
+            }
+            
+            lastAction = null;
+        }
+        
+        function updateProgress() {
+            const usSeen = regions.filter(r => r.type === 'us' && seen.has(r.code)).length;
+            const caSeen = regions.filter(r => r.type === 'ca' && seen.has(r.code)).length;
+            const terrSeen = regions.filter(r => r.type === 'territories' && seen.has(r.code)).length;
+            
+            document.getElementById('us-count').textContent = usSeen;
+            document.getElementById('us-bar').style.width = (usSeen / 50 * 100) + '%';
+            
+            document.getElementById('ca-count').textContent = caSeen;
+            document.getElementById('ca-bar').style.width = (caSeen / 13 * 100) + '%';
+            
+            document.getElementById('terr-count').textContent = terrSeen;
+            document.getElementById('terr-bar').style.width = (terrSeen / 5 * 100) + '%';
+        }
+        
+        function showProgress() {
+            const progressDiv = document.getElementById('progress-display');
+            progressDiv.style.display = progressDiv.style.display === 'none' ? 'block' : 'none';
+            updateProgress();
+        }
+        
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem('platequest_seen', JSON.stringify(Array.from(seen)));
+            localStorage.setItem('platequest_log', JSON.stringify(plateLog));
+        });
+        
+        setInterval(() => {
+            localStorage.setItem('platequest_seen', JSON.stringify(Array.from(seen)));
+            localStorage.setItem('platequest_log', JSON.stringify(plateLog));
+        }, 5000);
+        
+        window.addEventListener('load', () => {
+            const savedSeen = localStorage.getItem('platequest_seen');
+            if (savedSeen) seen = new Set(JSON.parse(savedSeen));
+            const savedLog = localStorage.getItem('platequest_log');
+            if (savedLog) plateLog = JSON.parse(savedLog);
+            
+            renderGrids();
+            renderLog();
+            updateProgress();
+        });
+    </script>
+</body>
+</html>
