@@ -352,6 +352,11 @@
             const caGrid = document.getElementById('canada-grid');
             const terrGrid = document.getElementById('territories-grid');
             
+            if (!usGrid || !caGrid || !terrGrid) {
+                console.error('Grid elements not found');
+                return;
+            }
+            
             usGrid.innerHTML = '';
             caGrid.innerHTML = '';
             terrGrid.innerHTML = '';
@@ -370,13 +375,15 @@
             
             // Populate state select
             const select = document.getElementById('state-select');
-            select.innerHTML = '';
-            regions.forEach(region => {
-                const option = document.createElement('option');
-                option.value = region.code;
-                option.textContent = region.name;
-                select.appendChild(option);
-            });
+            if (select) {
+                select.innerHTML = '';
+                regions.forEach(region => {
+                    const option = document.createElement('option');
+                    option.value = region.code;
+                    option.textContent = region.name;
+                    select.appendChild(option);
+                });
+            }
         }
         
         function markSeen(region) {
@@ -483,11 +490,24 @@
             localStorage.setItem('platequest_log', JSON.stringify(plateLog));
         }, 5000);
         
-        window.addEventListener('load', () => {
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
             const savedSeen = localStorage.getItem('platequest_seen');
-            if (savedSeen) seen = new Set(JSON.parse(savedSeen));
+            if (savedSeen) {
+                try {
+                    seen = new Set(JSON.parse(savedSeen));
+                } catch (e) {
+                    console.error('Error loading saved data:', e);
+                }
+            }
             const savedLog = localStorage.getItem('platequest_log');
-            if (savedLog) plateLog = JSON.parse(savedLog);
+            if (savedLog) {
+                try {
+                    plateLog = JSON.parse(savedLog);
+                } catch (e) {
+                    console.error('Error loading log:', e);
+                }
+            }
             
             renderGrids();
             renderLog();
